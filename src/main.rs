@@ -4,6 +4,8 @@ use dialoguer::{
     theme::ColorfulTheme,
     Input
 };
+#[macro_use] extern crate prettytable;
+use prettytable::{Table};
 
 struct Asset { 
     id: Uuid,
@@ -32,7 +34,8 @@ impl Session {
                     "Asset Lookup",
                     "Modify an Asset",
                     "Delete an Asset",
-                    "View All Assets"
+                    "View All Assets",
+                    "Exit Program",
                 ];
 
                 let chosen: usize = Select::with_theme(&ColorfulTheme::default())
@@ -43,7 +46,7 @@ impl Session {
                 println!("You have decided to choose: {}", chosen);
                 match chosen {
                     0 => {
-                        self.create_asset();
+                        self.create_asset()?;
                     },
                     1 => {
                     },
@@ -52,12 +55,13 @@ impl Session {
                     3 => {
                     },
                     4 => {
+                        self.view_assets();
                     },
                     5 => {
                         break;
                     },
                     _ => {
-                        break;
+                        println!("You managed to select in invalid option! Ridiculous!");
                     }
                 }
             }
@@ -66,6 +70,7 @@ impl Session {
             Ok(())
         } 
     }
+
     fn create_asset(&mut self) -> std::io::Result<()> {
         let input: String = Input::new()
             .with_prompt("Enter a name for the asset:")
@@ -79,6 +84,17 @@ impl Session {
         println!("Asset Created");
         Ok(())
     } 
+
+    fn view_assets(&self) {
+        let assets = &self.asset_library.dir;
+        let mut table = Table::new();
+        table.add_row(row!["ID", "NAME"]);
+        for asset in assets {
+            table.add_row(row![asset.id, asset.name]);
+        }
+
+        table.printstd();
+    }
 }
 
 fn main() -> std::io::Result<()> {
