@@ -1,11 +1,11 @@
-use uuid::Uuid; 
+use uuid::{Uuid}; 
 use dialoguer::{
     Select,
     theme::ColorfulTheme,
     Input
 };
 #[macro_use] extern crate prettytable;
-use prettytable::{Table};
+use prettytable::{Table };
 
 struct Asset { 
     id: Uuid,
@@ -43,12 +43,12 @@ impl Session {
                     .default(0)
                     .interact()?;
 
-                println!("You have decided to choose: {}", chosen);
                 match chosen {
                     0 => {
                         self.create_asset()?;
                     },
                     1 => {
+                        self.lookup_asset()?;
                     },
                     2 => {
                     },
@@ -73,7 +73,7 @@ impl Session {
 
     fn create_asset(&mut self) -> std::io::Result<()> {
         let input: String = Input::new()
-            .with_prompt("Enter a name for the asset:")
+            .with_prompt("Enter a name for the asset")
             .interact_text()?;
 
         let asset = Asset {
@@ -94,6 +94,33 @@ impl Session {
         }
 
         table.printstd();
+    }
+
+    fn lookup_asset(&self) -> std::io::Result<()> {
+        let assets = &self.asset_library.dir;
+        let input: String = Input::new()
+            .with_prompt("Enter asset uuid")
+            .interact_text()?;
+
+        match Uuid::parse_str(&input) {
+            Ok(uuid) => {
+                match assets.iter().position(|r| r.id == uuid) {
+                    Some(index) => {
+                        let mut table = Table::new();
+                        table.add_row(row!["ID", "NAME"]);
+                        table.add_row(row![assets[index].id, assets[index].name]);
+                        table.printstd();
+                    },
+                    None => {
+                        println!("No asset with UUID {} could be located.", uuid);
+                    }
+                };
+            },
+            Err(e)  => {
+                println!("The uuid passed into search was not valid.");
+            }
+        };
+        Ok(())
     }
 }
 
