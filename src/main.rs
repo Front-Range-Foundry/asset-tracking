@@ -132,18 +132,29 @@ impl Session {
     }
 
     fn update_asset(&mut self) {
-        match self.lookup_asset(false) {
-            Some(mut asset) => {
-                let input: String = Input::new()
-                    .with_prompt("Enter a new name for the asset")
-                    .interact_text()
-                    .expect("Something went wrong during text entry.");
+        let assets = &mut self.asset_library.dir;
+        let input: String = Input::new()
+            .with_prompt("Enter the asset's UUID")
+            .interact_text()
+            .expect("Something went wrong during text entry.");
 
-                asset.name = input;
-                println!("Asset updated: ");
-            },
-            None => {
-                println!("Asset not found.");
+        match Uuid::parse_str(&input) {
+            Ok(uuid) => {
+                let mut index = 0;
+                while index < assets.len() {
+                    if assets[index].id == uuid {
+                        let input: String = Input::new()
+                            .with_prompt("Enter a new name for the asset")
+                            .interact_text()
+                            .expect("Invalid entry.");
+                        println!("Asset {} now has {} for a name.", uuid, input);
+                        assets[index].name = input;
+                    }
+                    index += 1;
+                }
+            }, 
+            Err(_e) => {
+                println!("Invalid  uuid.");
             }
         }
     }
