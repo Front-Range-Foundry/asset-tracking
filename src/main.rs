@@ -16,6 +16,62 @@ struct AssetLibrary {
     dir: Vec<Asset>
 }
 
+impl AssetLibrary {
+    fn get_index(&self, id: Uuid) -> Option<usize> {
+        let assets = &self.dir;
+        match assets.iter().position(|r| r.id == id) {
+            Some(index) => {
+                Some(index)
+            },
+            None => {
+                None
+            }
+        }
+    }
+    fn get_one(&self, id: Uuid) -> Option<&Asset> {
+       match self.get_index(id) {
+            Some(index) => {
+                Some(&self.dir[index])
+            },
+            None => {
+                None
+            }
+       }
+    }
+    fn get_all(&self) -> &Vec<Asset> {
+        &self.dir
+    }
+    fn update_one(&mut self, id: Uuid, name: String) -> Option<&Asset> {
+        match self.get_index(id) {
+            Some(index) => {
+                self.dir[index].name = name;
+                Some(&self.dir[index])
+            },
+            None => {
+                None
+            }
+        }
+    }
+    fn delete_one(&mut self, id: Uuid) -> Option<Asset> {
+        match self.get_index(id) {
+            Some(index) => {
+                let removed_asset = self.dir.remove(index);
+                Some(removed_asset)
+            },
+            None => { None }
+        }
+    }
+    fn create_one(&mut self, name: String) -> usize {
+        let new_asset = Asset {
+            id: Uuid::new_v4(),
+            name
+        };
+
+        self.dir.push(new_asset);
+        self.dir.len()
+    }
+}
+
 struct Session {
     is_started: bool,
     asset_library: AssetLibrary,
@@ -48,7 +104,7 @@ impl Session {
                         self.create_asset()?;
                     },
                     1 => {
-                        self.lookup_asset(true);
+                        self.lookup_asset();
                     },
                     2 => {
                         self.update_asset();
@@ -77,29 +133,22 @@ impl Session {
         let input: String = Input::new()
             .with_prompt("Enter a name for the asset")
             .interact_text()?;
-
-        let asset = Asset {
-            id: Uuid::new_v4(),
-            name: input
-        };
-        self.asset_library.dir.push(asset);
+        self.asset_library.create_one(input);
         println!("Asset Created");
         Ok(())
     } 
 
     fn view_assets(&self) {
-        let assets = &self.asset_library.dir;
+        let assets = self.asset_library.get_all();
         let mut table = Table::new();
         table.add_row(row!["ID", "NAME"]);
         for asset in assets {
             table.add_row(row![asset.id, asset.name]);
         }
-
         table.printstd();
     }
 
-    fn lookup_asset(&self, should_render: bool) -> Option<Asset> {
-        let assets = &self.asset_library.dir;
+    fn lookup_asset(&self) -> Option<Asset> {
         let input: String = Input::new()
             .with_prompt("Enter asset uuid")
             .interact_text()
@@ -107,22 +156,17 @@ impl Session {
 
         match Uuid::parse_str(&input) {
             Ok(uuid) => {
-                match assets.iter().position(|r| r.id == uuid) {
-                    Some(index) => {
-                        if should_render {  
-                            let mut table = Table::new();
-                            table.add_row(row!["ID", "NAME"]);
-                            table.add_row(row![assets[index].id, assets[index].name]);
-                            table.printstd();
-                        }
-                        let asset = &assets[index];
-                        Some(asset)
+                match self.asset_library.get_one(uuid) {
+                    Some(asset) => {
+                        let mut table = Table::new();
+                        table.add_row(row!["ID", "NAME"]);
+                        table.add_row(row![asset.id, asset.name]);
+                        table.printstd();
                     },
                     None => {
-                        println!("No asset with UUID {} could be located.", uuid);
-                        None
+                        println!("No asset found for UUID {}", input);
                     }
-                };
+                }
             },
             Err(_e)  => {
                 println!("The uuid passed into search was not valid.");
@@ -132,7 +176,6 @@ impl Session {
     }
 
     fn update_asset(&mut self) {
-        let assets = &mut self.asset_library.dir;
         let input: String = Input::new()
             .with_prompt("Enter the asset's UUID")
             .interact_text()
@@ -140,17 +183,18 @@ impl Session {
 
         match Uuid::parse_str(&input) {
             Ok(uuid) => {
-                let mut index = 0;
-                while index < assets.len() {
-                    if assets[index].id == uuid {
-                        let input: String = Input::new()
-                            .with_prompt("Enter a new name for the asset")
-                            .interact_text()
-                            .expect("Invalid entry.");
-                        println!("Asset {} now has {} for a name.", uuid, input);
-                        assets[index].name = input;
+                let input: String = Input::new()
+                    .with_prompt("Enter a new name for the asset")
+                    .interact_text()
+                    .expect("Invalid entry.");
+
+                match self.asset_library.update_one(uuid, input) {
+                    Some(asset) => {
+                        println!("Asset {} now has {} for a name.", asset.id, asset.name);    
                     }
-                    index += 1;
+                    None => {
+                        println!("No Asset with UUID {} could be found.", uuid);
+                    }
                 }
             }, 
             Err(_e) => {
@@ -160,7 +204,6 @@ impl Session {
     }
 
     fn delete_asset(&mut self) {
-        let assets = &mut self.asset_library.dir;
         let input: String = Input::new()
             .with_prompt("Enter the asset's UUID")
             .interact_text()
@@ -168,12 +211,13 @@ impl Session {
 
         match Uuid::parse_str(&input) {
             Ok(uuid) => {
-                let mut index = 0;
-                while index < assets.len() {
-                    if assets[index].id == uuid {
-                        assets.remove(index);
+                match self.asset_library.delete_one(uuid) {
+                    Some(asset) => {
+                        println!("Asset {} was deleted.", asset.id);
+                    }, 
+                    None => {
+                        println!("Asset {} could not be found.", uuid);
                     }
-                    index += 1;
                 }
             }, 
             Err(_e) => {
