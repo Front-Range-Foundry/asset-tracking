@@ -1,4 +1,15 @@
 # asset-tracking
+## Running Assets 
+```shell
+git clone https://github.com/Front-Range-Foundry/asset-tracking.git
+cd asset-tracking
+cargo build 
+cargo run
+```
+
+### Running assets in a Workspace
+Assets are meant to run in a broader ingen environment. Refer to the Rust documentation on workspaces to create a local space and run Ingen packages in tandem. 
+
 An asset tracking application. 
 This simple Rust application is a project that uses everything in The Book up to chapter five. It creates a very simple, non-persisting RESTful application that allows its users to: 
 - create assets
