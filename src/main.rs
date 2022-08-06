@@ -16,6 +16,11 @@ struct AssetLibrary {
     dir: Vec<Asset>
 }
 
+struct Session {
+    is_started: bool,
+    asset_library: AssetLibrary,
+}
+
 impl AssetLibrary {
     fn get_index(&self, id: Uuid) -> Option<usize> {
         let assets = &self.dir;
@@ -72,11 +77,6 @@ impl AssetLibrary {
     }
 }
 
-struct Session {
-    is_started: bool,
-    asset_library: AssetLibrary,
-}
-
 impl Session {
     fn start(&mut self) -> std::io::Result<()> {
         println!("Welcome to Asset Handling.");
@@ -128,7 +128,6 @@ impl Session {
             Ok(())
         } 
     }
-
     fn create_asset(&mut self) -> std::io::Result<()> {
         let input: String = Input::new()
             .with_prompt("Enter a name for the asset")
@@ -137,7 +136,6 @@ impl Session {
         println!("Asset Created");
         Ok(())
     } 
-
     fn view_assets(&self) {
         let assets = self.asset_library.get_all();
         let mut table = Table::new();
@@ -147,7 +145,6 @@ impl Session {
         }
         table.printstd();
     }
-
     fn lookup_asset(&self) -> Option<Asset> {
         let input: String = Input::new()
             .with_prompt("Enter asset uuid")
@@ -174,7 +171,6 @@ impl Session {
         };
         None
     }
-
     fn update_asset(&mut self) {
         let input: String = Input::new()
             .with_prompt("Enter the asset's UUID")
@@ -202,7 +198,6 @@ impl Session {
             }
         }
     }
-
     fn delete_asset(&mut self) {
         let input: String = Input::new()
             .with_prompt("Enter the asset's UUID")
