@@ -9,11 +9,51 @@ use prettytable::{Table };
 
 struct Asset { 
     id: Uuid,
-    name: String
+    name: String,
+    species: Species
 }
 
 struct AssetLibrary {
     dir: Vec<Asset>
+}
+
+struct Session {
+    is_started: bool,
+    asset_library: AssetLibrary,
+}
+
+enum Species {
+    BRCH,
+    GALL,
+    TRIK,
+    PARA,
+    PROC,
+    MTCN, 
+    COEL,
+    TREX,
+    VELO,
+    DILO,
+    HERR,
+    BRNX,
+}
+
+impl Species {
+    fn as_str(&self) -> &'static str {
+        match self {
+            Species::BRCH => "BRCH",
+            Species::GALL => "GALL",
+            Species::TRIK => "TRIK",
+            Species::PARA => "PARA",
+            Species::PROC => "PROC",
+            Species::MTCN => "MTCN",
+            Species::COEL => "COEL",
+            Species::TREX => "TREX",
+            Species::VELO => "VELO",
+            Species::DILO => "DILO",
+            Species::HERR => "HERR",
+            Species::BRNX => "BRNX",
+        }
+    } 
 }
 
 impl AssetLibrary {
@@ -61,20 +101,16 @@ impl AssetLibrary {
             None => { None }
         }
     }
-    fn create_one(&mut self, name: String) -> usize {
+    fn create_one(&mut self, name: String, species: Species) -> usize {
         let new_asset = Asset {
             id: Uuid::new_v4(),
-            name
+            name,
+            species
         };
 
         self.dir.push(new_asset);
         self.dir.len()
     }
-}
-
-struct Session {
-    is_started: bool,
-    asset_library: AssetLibrary,
 }
 
 impl Session {
@@ -128,26 +164,26 @@ impl Session {
             Ok(())
         } 
     }
-
     fn create_asset(&mut self) -> std::io::Result<()> {
         let input: String = Input::new()
             .with_prompt("Enter a name for the asset")
             .interact_text()?;
-        self.asset_library.create_one(input);
+
+        let asset_type = self.select_species();
+        self.asset_library.create_one(input, asset_type);
         println!("Asset Created");
         Ok(())
     } 
-
     fn view_assets(&self) {
         let assets = self.asset_library.get_all();
         let mut table = Table::new();
-        table.add_row(row!["ID", "NAME"]);
+        table.add_row(row!["ID", "NAME", "SPECIES"]);
         for asset in assets {
-            table.add_row(row![asset.id, asset.name]);
+            let species_as_string = asset.species.as_str();
+            table.add_row(row![asset.id, asset.name, species_as_string]);
         }
         table.printstd();
     }
-
     fn lookup_asset(&self) -> Option<Asset> {
         let input: String = Input::new()
             .with_prompt("Enter asset uuid")
@@ -174,7 +210,6 @@ impl Session {
         };
         None
     }
-
     fn update_asset(&mut self) {
         let input: String = Input::new()
             .with_prompt("Enter the asset's UUID")
@@ -202,7 +237,6 @@ impl Session {
             }
         }
     }
-
     fn delete_asset(&mut self) {
         let input: String = Input::new()
             .with_prompt("Enter the asset's UUID")
@@ -224,6 +258,45 @@ impl Session {
                 println!("Invalid  uuid.");
             }
         }
+    }
+    fn select_species(&self) -> Species {
+        let items = vec![
+            "Brachiosaurus",
+            "Gallimimus",
+            "Triceratops",
+            "Parasaurolophus",
+            "Proceratosaurus",
+            "Metriacanthosaurus",
+            "Coelophysus",
+            "Tyrannosaurus Rex",
+            "Velociraptor",
+            "Dilophosaurus",
+            "Herrerrasaurus",
+            "Baryonyx"
+        ];
+
+        let chosen: usize = Select::with_theme(&ColorfulTheme::default())
+            .items(&items)
+            .default(0)
+            .interact()
+            .expect("Invalid selection");
+
+        match chosen { 
+            0 => { Species::BRCH },
+            1 => { Species::GALL },
+            2 => { Species::TRIK },
+            3 => { Species::PARA },
+            4 => { Species::PROC },
+            5 => { Species::MTCN },
+            6 => { Species::COEL },
+            7 => { Species::TREX },
+            8 => { Species::VELO },
+            9 => { Species::DILO },
+            10 => { Species::HERR },
+            11 => { Species::BRNX },
+            _ => { Species::BRCH }
+        }
+        
     }
 }
 
