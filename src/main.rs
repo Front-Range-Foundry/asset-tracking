@@ -5,7 +5,9 @@ use dialoguer::{
     Input
 };
 mod asset;
+mod vitals;
 use asset::{Asset, Species};
+use vitals::Vitals;
 
 #[macro_use] extern crate prettytable;
 use prettytable::{Table };
@@ -65,11 +67,7 @@ impl AssetLibrary {
         }
     }
     fn create_one(&mut self, name: String, species: Species) -> usize {
-        let new_asset = Asset {
-            id: Uuid::new_v4(),
-            name,
-            species
-        };
+        let new_asset = Asset::new(species, name);
 
         self.dir.push(new_asset);
         self.dir.len()
