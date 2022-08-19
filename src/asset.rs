@@ -1,6 +1,7 @@
 use uuid::Uuid;
-use chrono::{offset::{Local}, DateTime};
+use chrono::{offset::Local, DateTime};
 use crate::vitals;
+use crate::lifecycle_builder;
 
 pub enum Species {
     BRCH,
@@ -46,12 +47,7 @@ pub struct Asset {
     // pub location
     pub paddock_id: Option<Uuid>,
     // some dates
-    pub last_seen: Option<DateTime<Local>>, // this is the perfect use case for the builder.
-    pub egg_laid: Option<DateTime<Local>>,
-    pub hatched: Option<DateTime<Local>>,
-    pub released: Option<DateTime<Local>>,
-    pub died: Option<DateTime<Local>>,
-    pub last_veterinary_checkup: Option<DateTime<Local>>,
+    pub lifecycle: lifecycle_builder::LifecycleBuilder,
     pub record_created: DateTime<Local>,
     // some flags;
     pub is_alive: bool,
@@ -65,21 +61,15 @@ pub struct Asset {
 
 impl Asset {
     pub fn new(species: Species, name: String) -> Asset {
+        let asset_id = Uuid::new_v4();
         Asset {
-            id: Uuid::new_v4(),
+            id: asset_id,
             name: String::from(name),
             species,
             security_level: 1,
             vitals: vitals::Vitals::new(Uuid::new_v4()),
             paddock_id: None,
-
-            // initialize dates with nothing
-            last_seen: None,
-            egg_laid: None,
-            hatched: None,
-            released: None,
-            died: None,
-            last_veterinary_checkup: None,
+            lifecycle: lifecycle_builder::LifecycleBuilder::new(asset_id),
             record_created: Local::now(),
             is_alive: true,
             is_contained: true,
