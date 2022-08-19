@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build
+    - name: Build Em Up
       run: cargo build --verbose
-    - name: Check the code 
-      run: cargo check
+    - name: Knock Em Down
+      run: cargo test
