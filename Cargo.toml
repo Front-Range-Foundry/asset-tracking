@@ -1,5 +1,5 @@
 [package]
-name = "asset_tracking_fo_rizzle"
+name = "asset_tracking"
 version = "0.1.0"
 edition = "2021"
 

@@ -5,9 +5,9 @@ use dialoguer::{
     Input
 };
 mod asset;
+mod lifecycle_builder;
 mod vitals;
 use asset::{Asset, Species};
-use vitals::Vitals;
 
 #[macro_use] extern crate prettytable;
 use prettytable::{Table };
