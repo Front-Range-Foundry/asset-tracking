@@ -1,11 +1,13 @@
-
+use uuid::Uuid;
 
 pub struct Vitals {
+	pub id: Uuid,
 }
 
 impl Vitals {
-	pub fn new() -> Vitals {
+	pub fn new(id: Uuid) -> Vitals {
 		Vitals {
+			id,
 		}
 	}
 }
@@ -14,9 +16,10 @@ impl Vitals {
 mod tests {
     use super::*;
 
-    #[test]
-    fn vitals_can_be_created() {
-		let vitals = Vitals {};
-		assert_eq!(vitals, Vitals {});
-	}
+		#[test]
+		fn we_can_create_vitals() {
+			let uuid = Uuid::new_v4();
+			let vitals = Vitals::new(uuid);
+			assert_eq!(vitals.id, uuid);
+		}
 }

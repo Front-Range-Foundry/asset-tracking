@@ -70,7 +70,7 @@ impl Asset {
             name: String::from(name),
             species,
             security_level: 1,
-            vitals: vitals::Vitals::new(),
+            vitals: vitals::Vitals::new(Uuid::new_v4()),
             paddock_id: None,
 
             // initialize dates with nothing
@@ -89,5 +89,17 @@ impl Asset {
             needs_status_check: false,
             needs_veterinary_care: false,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn we_can_create_an_asset() {
+        let asset = Asset::new(Species::BRCH, String::from("BigBrachy"));
+        assert_eq!(asset.name, "BigBrachy");
+        assert!(matches!(asset.species, Species::BRCH));
     }
 }

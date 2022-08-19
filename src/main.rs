@@ -7,7 +7,6 @@ use dialoguer::{
 mod asset;
 mod vitals;
 use asset::{Asset, Species};
-use vitals::Vitals;
 
 #[macro_use] extern crate prettytable;
 use prettytable::{Table };
