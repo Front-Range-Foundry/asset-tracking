@@ -2,6 +2,7 @@ use uuid::Uuid;
 use chrono::{offset::Local, DateTime};
 use crate::vitals;
 use crate::lifecycle_builder;
+use crate::diet;
 
 pub enum Species {
     BRCH,
@@ -43,7 +44,7 @@ pub struct Asset {
     pub species: Species,
     pub security_level: u8,
     pub vitals: vitals::Vitals,
-    // pub diet
+    pub diet: diet::DietTracker,
     // pub location
     pub paddock_id: Option<Uuid>,
     // some dates
@@ -65,10 +66,10 @@ impl Asset {
         Asset {
             id: asset_id,
             name: String::from(name),
-            species,
             security_level: 1,
             vitals: vitals::Vitals::new(Uuid::new_v4()),
             paddock_id: None,
+            diet: diet::DietTracker::new(asset_id, &species),
             lifecycle: lifecycle_builder::LifecycleBuilder::new(asset_id),
             record_created: Local::now(),
             is_alive: true,
@@ -78,6 +79,7 @@ impl Asset {
             needs_feeding: false,
             needs_status_check: false,
             needs_veterinary_care: false,
+            species,
         }
     }
 }
